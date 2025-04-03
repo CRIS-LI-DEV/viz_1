@@ -348,8 +348,16 @@ def listar_controladores(request):
     return Response(serializer.data)
 
 
+# @api_view(['GET'])
+# def listar_historial_sensor(request, sensor_id):
+#     historial = HistorialSensor.objects.filter(sensor_id=sensor_id)
+#     serializer = HistorialSensorSerializer(historial, many=True)
+#     return Response(serializer.data)
+
+
+
 @api_view(['GET'])
 def listar_historial_sensor(request, sensor_id):
-    historial = HistorialSensor.objects.filter(sensor_id=sensor_id)
+    historial = HistorialSensor.objects.filter(sensor_id=sensor_id).order_by('-id')[:100]
     serializer = HistorialSensorSerializer(historial, many=True)
     return Response(serializer.data)
