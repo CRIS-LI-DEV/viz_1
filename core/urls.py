@@ -19,5 +19,6 @@ urlpatterns = [
     path('detalle_historial_actuador/<int:actuador_id>', detalle_historial_actuador, name='detalle_historial_actuador'),
      path('api/sensores/', listar_sensores, name='listar_sensores'),
      path('api/controladores/', listar_controladores, name='listar_controladores'),
-      path('api/historial-sensor/<int:sensor_id>/', listar_historial_sensor, name='listar_historial_sensor')
+      path('api/historial-sensor/<int:sensor_id>/', listar_historial_sensor, name='listar_historial_sensor'),
+      path('cont/', Estatico.as_view(), name='contenido_estatico')
 ]

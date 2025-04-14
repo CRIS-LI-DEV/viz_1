@@ -361,3 +361,21 @@ def listar_historial_sensor(request, sensor_id):
     historial = HistorialSensor.objects.filter(sensor_id=sensor_id).order_by('-id')[:100]
     serializer = HistorialSensorSerializer(historial, many=True)
     return Response(serializer.data)
+
+
+
+class Estatico(APIView):
+    
+    def post(self, request):
+        id_recibido = request.data.get('id')
+
+        # Aquí puedes hacer lógica con el id (consulta, cálculo, etc.)
+        # En este ejemplo es fijo, pero podrías hacer algo como:
+        # data = TuModelo.objects.get(pk=id_recibido) y usar esos datos
+
+        if id_recibido is None:
+            return Response({"error": "Falta el campo 'id'"}, status=400)
+        
+        # Respuesta de ejemplo
+        respuesta = {"w": 1, "c": id_recibido, "b": 1, "e": 1}
+        return Response(respuesta)
