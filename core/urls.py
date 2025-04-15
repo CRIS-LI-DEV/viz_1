@@ -8,8 +8,8 @@ from app.views.sensor_views import SensorAPIView, SensorDetalleAPIView
 from app.views.control_web import ControlWebAPIView
 
 historiales = [ 
-    path('api/actuador/<int:id>/historial/<int:numero_registros>/', HistorialActuadorAPIView.as_view(), name='historial_actuador'),
-    path('api/sensor/<int:id>/historial/<int:numero_registros>/', HistorialSensorAPIView.as_view(), name='historial_sensor')
+    path('api/actuadores/<int:id>/historial/<int:numero_registros>/', HistorialActuadorAPIView.as_view(), name='historial_actuador'),
+    path('api/sensores/<int:id>/historial/<int:numero_registros>/', HistorialSensorAPIView.as_view(), name='historial_sensor')
     ]
 
 
