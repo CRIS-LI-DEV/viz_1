@@ -38,9 +38,9 @@ class BrokerIn(APIView):
                         print(f"Actuador {clave} => Valor: {valor}")
 
                     except Actuador.DoesNotExist:
-                        print(f"⚠️ Actuador con ID {solo_numero} no encontrado.")
+                        print(f"Actuador con ID {solo_numero} no encontrado.")
                     except ValueError:
-                        print(f"⚠️ No se pudo convertir {clave} a número.")
+                        print(f"No se pudo convertir {clave} a número.")
                 
             
 
@@ -61,9 +61,9 @@ class BrokerIn(APIView):
                         print(f"Sensor {clave} => Valor: {valor}")
 
                     except Sensor.DoesNotExist:
-                        print(f"⚠️ Actuador con ID {solo_numero} no encontrado.")
+                        print(f"Actuador con ID {solo_numero} no encontrado.")
                     except ValueError:
-                        print(f"⚠️ No se pudo convertir {clave} a número.")
+                        print(f" No se pudo convertir {clave} a número.")
             
             return Response({"mensaje": "Datos procesados correctamente"}, status=status.HTTP_201_CREATED)
 
@@ -71,13 +71,22 @@ class BrokerOut(APIView):
     def get(self, request):
         pass
     def post(self, request):
-        
-        cwc = ControlWebControlador.objects.get(id = 7)
+        print("entro")
+        id = request.data["id"]
+        cwc = ControlWebControlador.objects.get(controlador_id = id)
+        cwas = []
 
-        cwa_1= ControlWebActuador.objects.get(id=5) 
-        cwa_2= ControlWebActuador.objects.get(id=6) 
+
+        actuadores = Actuador.objects.filter(controlador_id = id)
+
+        for actuador in actuadores:
+            print(actuador.id, actuador.nombre)
+            cwa = ControlWebActuador.objects.get(actuador_id = actuador.id)
+            cwas.append({ "id":actuador.id, "cwa":  cwa.estado   })
+
+        print(cwc)
 
         
         
-        return Response({"cwc":cwc.estado,"cwa_1":cwa_1.estado,"cwa_2":cwa_2.estado})
+        return Response({"cwc" : cwc.estado , "cwas" : cwas}, status=status.HTTP_201_CREATED)
     

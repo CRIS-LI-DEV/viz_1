@@ -9,7 +9,7 @@ from app.views.control_web import ControlWebAPIView
 
 historiales = [ 
     path('api/actuador/<int:id>/historial/<int:numero_registros>/', HistorialActuadorAPIView.as_view(), name='historial_actuador'),
-    path('api/sensor/<int:id>/historial/<int:numero_registros>/', HistorialSensorAPIView.as_view(), name='historial_actuador')
+    path('api/sensor/<int:id>/historial/<int:numero_registros>/', HistorialSensorAPIView.as_view(), name='historial_sensor')
     ]
 
 
@@ -23,12 +23,12 @@ broker = [
 
 controladores = [
     path('api/controladores/', ControladorAPIView.as_view(), name='controlador'),
-      path('api/controladores/<int:pk>/', ControladorDetalleAPIView.as_view(), name='controlador')
+      path('api/controladores/<int:pk>/', ControladorDetalleAPIView.as_view(), name='detalle-controlador')
     ]
 
 actuadores =[
     path('api/actuadores/<int:pk>/', ActuadorDetalleAPIView.as_view(), name='actuador-detalle'),
-    path('api/actuadores/', ActuadorAPIView.as_view(), name='actuador-detalle'),
+    path('api/actuadores/', ActuadorAPIView.as_view(), name='actuador'),
     
     ]
 

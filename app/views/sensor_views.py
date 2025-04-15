@@ -7,6 +7,11 @@ from app.services.sensor_service import get_historial_sensor
 from rest_framework.generics import get_object_or_404
 
 class SensorAPIView(APIView):
+    def get(self, request):
+        sensores = Sensor.objects.all()
+        serializer = SensorSerializer(sensores, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     def post(self, request):
       
         sensor_serializer = SensorSerializer(data=request.data)

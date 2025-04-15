@@ -53,3 +53,15 @@ class ControladorDetalleAPIView(APIView):
                 "sensores": sensores_serializer.data,
                 "actuadores": actuadores_serializer.data
             }, status=status.HTTP_200_OK)
+        
+        def post(self, request, pk):
+            cwc = get_object_or_404(ControlWebControlador, controlador_id=pk)
+            nuevo_estado = request.data.get('estado')
+
+            if nuevo_estado is None:
+                return Response({"error": "Se requiere el campo 'estado'."}, status=status.HTTP_400_BAD_REQUEST)
+
+            cwc.estado = bool(nuevo_estado)
+            cwc.save()
+
+            return Response({"mensaje": "Estado actualizado correctamente.", "nuevo_estado": cwc.estado}, status=status.HTTP_200_OK)
