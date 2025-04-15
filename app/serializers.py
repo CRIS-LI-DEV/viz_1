@@ -29,3 +29,37 @@ class HistorialSensorSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialSensor
         fields = ['id', 'sensor', 'valor', 'fecha_cambio']
+
+
+
+class ControlWebControladorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ControlWebControlador
+        fields = ['controlador', 'estado']
+
+
+class ActuadorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Actuador
+        fields = ['id', 'nombre', 'tipo', 'controlador']  # Incluye los campos relevantes
+
+class ControladorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Controlador
+        fields = ['id', 'nombre', 'modelo']  # Incluye los campos relevantes
+
+class ActuadorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Actuador
+        fields = ['id', 'nombre', 'tipo', 'estado', 'fecha_registro', 'controlador']
+
+
+class ControlWebActuadorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ControlWebActuador
+        fields = ['id', 'actuador', 'estado']
+
+class HistorialActuadorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HistorialActuador
+        fields = '__all__'

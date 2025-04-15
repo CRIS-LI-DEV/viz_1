@@ -1,0 +1,144 @@
+from django.shortcuts import render, redirect
+
+from .models import *
+
+
+from datetime import datetime
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import DatosSensorSerializer
+from .models import Controlador, ControlWebControlador
+from rest_framework import viewsets
+from .models import Sensor
+from .serializers import SensorSerializer
+from .serializers import ControladorSerializer,ControlWebControladorSerializer
+from .serializers import ActuadorSerializer, ControlWebControladorSerializer,ControlWebActuadorSerializer
+from .serializers import HistorialSensorSerializer
+
+
+
+
+class recibir(APIView):
+    def post(self, request):
+        # Imprimir los datos que llegan
+        print("Datos recibidos:", request.data)
+        
+        # Procesar sensores
+        sensores = request.data.get('sensores', [])
+        for x in sensores:
+            print(f" Sensor: {x['id']}, Valor: {x['valor']}")
+
+            sensor_id = x['id']
+            sensor_valor = x['valor']
+
+            try:
+                sensor = Sensor.objects.get(id=sensor_id)
+                sensor.valor_actual = sensor_valor
+                sensor.save()
+
+                historial = HistorialSensor(
+                    sensor=sensor,
+                    valor=sensor_valor,
+                    fecha_cambio=datetime.now()
+                )
+                historial.save()
+            except Sensor.DoesNotExist:
+                print(f"Sensor con ID {sensor_id} no encontrado.")
+
+        # Procesar actuadores
+        actuadores = request.data.get('actuadores', [])
+        for x in actuadores:
+            print(f" Actuador: {x['id']}, Estado: {x['estado']}")
+
+            actuador_id = x['id']
+            actuador_estado = x['estado']
+
+            try:
+                actuador = Actuador.objects.get(id=actuador_id)
+                actuador.estado = bool(actuador_estado)  # Convertir estado a booleano
+                actuador.save()
+
+                historial = HistorialActuador(
+                    actuador=actuador,
+                    estado=actuador.estado,
+                    fecha_cambio=datetime.now()
+                )
+                historial.save()
+            except Actuador.DoesNotExist:
+                print(f"Actuador con ID {actuador_id} no encontrado.")
+
+        # Procesar los datos con el serializador
+        serializer = DatosSensorSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"status": "success", "received_data": serializer.validated_data}, status=status.HTTP_200_OK)
+        
+        return Response({"status": "error", "message": "JSON inválido", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+class ControladorAPI(APIView):
+    def get(self, request):
+        controlador_id = request.query_params.get('id')
+
+        if controlador_id:
+            try:
+                controlador = Controlador.objects.get(pk=controlador_id)
+                controlador_data = ControladorSerializer(controlador).data
+
+                try:
+                    control_web = ControlWebControlador.objects.get(controlador=controlador)
+                    controlador_data['control_web_controlador'] = ControlWebControladorSerializer(control_web).data
+                except ControlWebControlador.DoesNotExist:
+                    controlador_data['control_web_controlador'] = None
+
+                return Response(controlador_data)
+            except Controlador.DoesNotExist:
+                return Response({'error': 'Controlador no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Si no hay ID, devolver todos
+        controladores = Controlador.objects.all()
+        data = []
+
+        for controlador in controladores:
+            controlador_data = ControladorSerializer(controlador).data
+            try:
+                control_web = ControlWebControlador.objects.get(controlador=controlador)
+                controlador_data['control_web_controlador'] = ControlWebControladorSerializer(control_web).data
+            except ControlWebControlador.DoesNotExist:
+                controlador_data['control_web_controlador'] = None
+            data.append(controlador_data)
+
+        return Response(data)
+
+
+class CrearActuadorAPIView(APIView):
+    def post(self, request):
+        actuador_serializer = ActuadorSerializer(data=request.data)
+
+        if actuador_serializer.is_valid():
+            # Guardar el actuador
+            actuador = actuador_serializer.save()
+
+            # Crear un ControlWebActuador relacionado con el actuador
+            control_web_actuador = ControlWebActuador(actuador=actuador, estado=False)
+            control_web_actuador.save()
+
+            # Serializar el objeto ControlWebActuador
+            control_web_actuador_serializer = ControlWebActuadorSerializer(control_web_actuador)
+
+            # Devolver la respuesta con los datos del actuador y el control_web_actuador
+            return Response({
+                'actuador': actuador_serializer.data,
+                'control_web_actuador': control_web_actuador_serializer.data
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response(actuador_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

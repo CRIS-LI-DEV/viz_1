@@ -94,3 +94,4 @@ class HistorialActuador(models.Model):
 class ControlWebActuador(models.Model):
     actuador = models.ForeignKey('Actuador', on_delete=models.CASCADE)
     estado = models.BooleanField()
+

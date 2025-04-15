@@ -1,24 +1,45 @@
-
-from django.contrib import admin
+# urls.py
 from django.urls import path
-from app.views import *
+from app.views.actuador_views import  ActuadorAPIView, ActuadorDetalleAPIView
+from app.views.historial_views import HistorialActuadorAPIView, HistorialSensorAPIView
+from app.views.controlador_views import ControladorAPIView,ControladorDetalleAPIView
+from app.views.broker import BrokerIn,BrokerOut
+from app.views.sensor_views import SensorAPIView, SensorDetalleAPIView
+from app.views.control_web import ControlWebAPIView
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('controlador/', crear_controlador),
-    path('sensor/', crear_sensor),
-    path('actuador/', crear_actuador),
-    path('lista_controladores/', lista_controladores, name='lista_controladores'),
-    path('lista_sensores/', lista_sensores, name='lista_sensores'),
-    path('lista_actuadores/', lista_actuadores, name='lista_actuadores'),
-    path('api/recibir-json/', recibir.as_view()),
-    path('controladores/<int:controlador_id>/', detalle_controlador, name='detalle_controlador'),
-    path('sensores/<int:sensor_id>/', detalle_sensor, name='detalle_sensor'),
-    path('actuadores/<int:actuador_id>/', detalle_actuador, name='detalle_actuador'),
-    path('detalle_historial_sensor/<int:sensor_id>/', detalle_historial_sensor),
-    path('detalle_historial_actuador/<int:actuador_id>', detalle_historial_actuador, name='detalle_historial_actuador'),
-     path('api/sensores/', listar_sensores, name='listar_sensores'),
-     path('api/controladores/', listar_controladores, name='listar_controladores'),
-      path('api/historial-sensor/<int:sensor_id>/', listar_historial_sensor, name='listar_historial_sensor'),
-      path('cont/', Estatico.as_view(), name='contenido_estatico')
+historiales = [ 
+    path('api/actuador/<int:id>/historial/<int:numero_registros>/', HistorialActuadorAPIView.as_view(), name='historial_actuador'),
+    path('api/sensor/<int:id>/historial/<int:numero_registros>/', HistorialSensorAPIView.as_view(), name='historial_actuador')
+    ]
+
+
+
+broker = [
+    path('br-in/', BrokerIn.as_view(), name='broker_in'),
+    path('br-out/', BrokerOut.as_view(), name='broker_out')
+    ]
+
+
+
+controladores = [
+    path('api/controladores/', ControladorAPIView.as_view(), name='controlador'),
+      path('api/controladores/<int:pk>/', ControladorDetalleAPIView.as_view(), name='controlador')
+    ]
+
+actuadores =[
+    path('api/actuadores/<int:pk>/', ActuadorDetalleAPIView.as_view(), name='actuador-detalle'),
+    path('api/actuadores/', ActuadorAPIView.as_view(), name='actuador-detalle'),
+    
+    ]
+
+sensores = [ 
+    path('api/sensor/', SensorAPIView.as_view(), name='sensor'),
+    path('api/sensores/<int:pk>/', SensorDetalleAPIView.as_view(), name='sensor-detalle'),
+    ]
+
+control_web=[
+    path('api/control_web/', ControlWebAPIView.as_view(), name='control_web'),
+
+
 ]
+urlpatterns = historiales + broker + controladores + sensores +actuadores + control_web
