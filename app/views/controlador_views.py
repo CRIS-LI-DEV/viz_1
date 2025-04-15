@@ -2,8 +2,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from app.serializers import ControladorSerializer
-from app.models import Controlador, ControlWebControlador
+from app.serializers import ControladorSerializer, SensorSerializer, ActuadorSerializer
+from app.models import Controlador, ControlWebControlador, Sensor, Actuador
 from rest_framework.generics import get_object_or_404
 
 
@@ -36,10 +36,20 @@ class ControladorAPIView(APIView):
 
 
 class ControladorDetalleAPIView(APIView):
-    def get(self, request, pk):
-        controlador = get_object_or_404(Controlador, id=pk)
-        
-        cwc = ControlWebControlador.objects.get(controlador_id = pk) 
-        
-        serializer = ControladorSerializer(controlador)
-        return Response({"controlador":serializer.data,"cwc":cwc.estado}, status=status.HTTP_200_OK)
+        def get(self, request, pk):
+            controlador = get_object_or_404(Controlador, id=pk)
+            cwc = ControlWebControlador.objects.get(controlador_id=pk)
+
+            sensores = Sensor.objects.filter(controlador=controlador)
+            actuadores = Actuador.objects.filter(controlador=controlador)
+
+            controlador_serializer = ControladorSerializer(controlador)
+            sensores_serializer = SensorSerializer(sensores, many=True)
+            actuadores_serializer = ActuadorSerializer(actuadores, many=True)
+
+            return Response({
+                "controlador": controlador_serializer.data,
+                "cwc": cwc.estado,
+                "sensores": sensores_serializer.data,
+                "actuadores": actuadores_serializer.data
+            }, status=status.HTTP_200_OK)

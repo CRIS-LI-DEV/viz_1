@@ -33,7 +33,7 @@ actuadores =[
     ]
 
 sensores = [ 
-    path('api/sensor/', SensorAPIView.as_view(), name='sensor'),
+    path('api/sensores/', SensorAPIView.as_view(), name='sensor'),
     path('api/sensores/<int:pk>/', SensorDetalleAPIView.as_view(), name='sensor-detalle'),
     ]
 
