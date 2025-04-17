@@ -19,6 +19,7 @@ class BrokerIn(APIView):
      
        
         return Response({"cwa":cwc.estado,"cwa_1":cwa_1.estado,"cwa_2":cwa_2.estado})
+    
     def post(self, request):
             datos = request.data 
 
