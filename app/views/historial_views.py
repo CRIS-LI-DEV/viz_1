@@ -32,26 +32,32 @@ class HistorialRangoDatosActuador(APIView):
     desde una fecha específica hacia atrás, ordenados cronológicamente.
     """
     def get(self, request, id, fecha, n_datos):
+        # Validar fecha
+        fecha_obj = parse_datetime(fecha)
+        if not fecha_obj:
+            return Response({'error': 'Formato de fecha inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Asegurar que sea timezone-aware
+        if is_naive(fecha_obj):
+            fecha_obj = make_aware(fecha_obj)
+
+        # Validar número de datos
         try:
-            # Convertir fecha desde string ISO a datetime
-            fecha_obj = parse_datetime(fecha)
-            if not fecha_obj:
-                return Response({'error': 'Formato de fecha inválido.'}, status=status.HTTP_400_BAD_REQUEST)
-
-            # Asegurar zona horaria (timezone-aware)
-            if is_naive(fecha_obj):
-                fecha_obj = make_aware(fecha_obj)
-
             n_datos = int(n_datos)
+        except ValueError:
+            return Response({'error': 'n_datos debe ser un número entero.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Obtener historial desde la fecha hacia atrás
-            historial = HistorialActuador.objects.filter(
-                actuador_id=id,
-                fecha_cambio__lte=fecha_obj
-            ).order_by('-fecha_cambio')[:n_datos]
-
-            # Invertir para ordenar de más antiguo a más reciente
-            historial = list(historial)[::-1]
+        try:
+            # Obtener los últimos N registros antes de la fecha, optimizando acceso
+            historial = list(
+                HistorialActuador.objects.filter(
+                    actuador_id=id,
+                    fecha_cambio__lte=fecha_obj
+                )
+                .select_related('actuador')  # Evita múltiples consultas por cada actuador
+                .only('estado', 'fecha_cambio', 'descripcion', 'actuador__nombre')  # Solo los campos necesarios
+                .order_by('-fecha_cambio')[:n_datos]
+            )[::-1]  # Invertir para orden cronológico ascendente
 
             data = [{
                 'actuador': h.actuador.nombre,
@@ -63,40 +69,43 @@ class HistorialRangoDatosActuador(APIView):
             return Response({'historial': data}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response({'error': f'Ocurrió un error inesperado: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
-        
 class HistorialRangoDatosSensor(APIView):
-        def get(self, request, id, fecha, n_datos):
-            try:
-                fecha_obj = parse_datetime(fecha)
-                if not fecha_obj:
-                    return Response({'error': 'Formato de fecha inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, id, fecha, n_datos):
+        # Validación rápida de fecha
+        fecha_obj = parse_datetime(fecha)
+        if not fecha_obj:
+            return Response({'error': 'Formato de fecha inválido.'}, status=status.HTTP_400_BAD_REQUEST)
 
-                # Asegurar que la fecha sea "timezone-aware"
-                if is_naive(fecha_obj):
-                    fecha_obj = make_aware(fecha_obj)
+        if is_naive(fecha_obj):
+            fecha_obj = make_aware(fecha_obj)
 
-                n_datos = int(n_datos)
+        try:
+            n_datos = int(n_datos)
+        except ValueError:
+            return Response({'error': 'n_datos debe ser un número entero.'}, status=status.HTTP_400_BAD_REQUEST)
 
-                historial = HistorialActuador.objects.filter(
-                    actuador_id=id,
-                    fecha_cambio__lte=fecha_obj
-                ).order_by('-fecha_cambio')[:n_datos]
+        # Optimización clave: usar .select_related para evitar consultas N+1
+        historial_qs = (
+            HistorialActuador.objects
+            .select_related('actuador')  # Carga el nombre del actuador en el mismo query
+            .filter(actuador_id=id, fecha_cambio__lte=fecha_obj)
+            .order_by('-fecha_cambio')
+            .only('estado', 'fecha_cambio', 'descripcion', 'actuador__nombre')  # Solo los campos necesarios
+        )[:n_datos]  # slicing al final para eficiencia
 
-                historial = list(historial)[::-1]  # De más antiguo a más reciente
+        # Generar respuesta
+        data = [
+            {
+                'actuador': h.actuador.nombre,
+                'estado': h.estado,
+                'fecha': h.fecha_cambio,
+                'descripcion': h.descripcion
+            }
+            for h in reversed(historial_qs)  # De más antiguo a reciente
+        ]
 
-                data = [{
-                    'actuador': h.actuador.nombre,
-                    'estado': h.estado,
-                    'fecha': h.fecha_cambio,
-                    'descripcion': h.descripcion
-                } for h in historial]
-
-                return Response({'historial': data}, status=status.HTTP_200_OK)
-
-            except Exception as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'historial': data}, status=status.HTTP_200_OK)
