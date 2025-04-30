@@ -95,3 +95,18 @@ class ControlWebActuador(models.Model):
     actuador = models.ForeignKey('Actuador', on_delete=models.CASCADE)
     estado = models.BooleanField()
 
+
+
+
+
+
+
+
+class PerfilAvanzado(models.Model):      
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+
+
+class PerfilBasico(models.Model):   
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+ 

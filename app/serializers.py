@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from  .models import *
+from django.contrib.auth.models import User
 class DatosSensorSerializer(serializers.Serializer):
     boton = serializers.IntegerField()
     puerta = serializers.IntegerField()
@@ -62,4 +63,12 @@ class ControlWebActuadorSerializer(serializers.ModelSerializer):
 class HistorialActuadorSerializer(serializers.ModelSerializer):
     class Meta:
         model = HistorialActuador
+        fields = '__all__'
+
+
+
+
+class UserSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = '__all__'

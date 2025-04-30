@@ -71,8 +71,13 @@ class BrokerIn(APIView):
 class BrokerOut(APIView):
     def get(self, request):
         pass
+    
+    
+    
+    
+    
     def post(self, request):
-        print("entro")
+        # print("ID : " +  request.data["id"] )
         id = request.data["id"]
         cwc = ControlWebControlador.objects.get(controlador_id = id)
         cwas = []

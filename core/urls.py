@@ -6,7 +6,7 @@ from app.views.controlador_views import ControladorAPIView,ControladorDetalleAPI
 from app.views.broker import BrokerIn,BrokerOut
 from app.views.sensor_views import SensorAPIView, SensorDetalleAPIView
 from app.views.control_web import ControlWebAPIView
-
+from app.views.auth_views import *
 historiales = [ 
     path('api/actuadores/<int:id>/historial/<int:numero_registros>/', HistorialActuadorAPIView.as_view(), name='historial_actuador'),
     path('api/sensores/<int:id>/historial/<int:numero_registros>/', HistorialSensorAPIView.as_view(), name='historial_sensor'),
@@ -42,6 +42,16 @@ sensores = [
 control_web=[
     path('api/control_web/', ControlWebAPIView.as_view(), name='control_web'),
 
-
 ]
-urlpatterns = historiales + broker + controladores + sensores + actuadores + control_web
+
+auth_user =[
+    path('api/user/register/', Usuario.as_view(), name='registro'),
+    path('api/user/login/', login, name='login'),
+    path('api/user/test-p-basico/', profile_avanzado, name='test-perfil-avanzado'), 
+    path('api/user/test-p-avanzado/', profile_basico, name='test-basico-avanzado'),
+]
+
+
+
+
+urlpatterns = historiales + broker + controladores + sensores + actuadores + control_web + auth_user
