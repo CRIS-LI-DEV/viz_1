@@ -47,8 +47,8 @@ control_web=[
 auth_user =[
     path('api/user/register/', Usuario.as_view(), name='registro'),
     path('api/user/login/', login, name='login'),
-    path('api/user/test-p-basico/', profile_avanzado, name='test-perfil-avanzado'), 
-    path('api/user/test-p-avanzado/', profile_basico, name='test-basico-avanzado'),
+    path('api/user/test-p-basico/', profile_basico, name='test-perfil-avanzado'), 
+    path('api/user/test-p-avanzado/', profile_avanzado, name='test-basico-avanzado'),
 ]
 
 
