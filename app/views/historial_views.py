@@ -72,7 +72,7 @@ class HistorialRangoDatosActuador(APIView):
             return Response({'error': f'Ocurrió un error inesperado: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
+"""
 class HistorialRangoDatosSensor(APIView):
     def get(self, request, id, fecha, n_datos):
         # Validación rápida de fecha
@@ -106,6 +106,44 @@ class HistorialRangoDatosSensor(APIView):
                 'descripcion': h.descripcion
             }
             for h in reversed(historial_qs)  # De más antiguo a reciente
+        ]
+
+        return Response({'historial': data}, status=status.HTTP_200_OK)
+"""
+
+class HistorialRangoDatosSensor(APIView):
+    def get(self, request, id, fecha, n_datos):
+        # Validación rápida de fecha
+        fecha_obj = parse_datetime(fecha)
+        if not fecha_obj:
+            return Response({'error': 'Formato de fecha inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if is_naive(fecha_obj):
+            fecha_obj = make_aware(fecha_obj)
+
+        try:
+            n_datos = int(n_datos)
+        except ValueError:
+            return Response({'error': 'n_datos debe ser un número entero.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Consultar historial de sensor en vez de actuador
+        historial_qs = (
+            HistorialSensor.objects
+            .select_related('sensor')  # Cargar el sensor para obtener su nombre y unidad
+            .filter(sensor_id=id, fecha_cambio__lte=fecha_obj)
+            .order_by('-fecha_cambio')
+            .only('valor', 'fecha_cambio', 'sensor__nombre', 'sensor__unidad_medida')  # Solo campos necesarios
+        )[:n_datos]  # Limitar la consulta
+
+        # Generar respuesta, ordenando de más antiguo a más reciente
+        data = [
+            {
+                'sensor': h.sensor.nombre,
+                'valor': h.valor,
+                'unidad_medida': h.sensor.unidad_medida,
+                'fecha': h.fecha_cambio
+            }
+            for h in reversed(historial_qs)
         ]
 
         return Response({'historial': data}, status=status.HTTP_200_OK)

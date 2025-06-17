@@ -17,34 +17,6 @@ from rest_framework.authtoken.models import Token
 from app.permissions import EsPerfilBasico, EsPerfilAvanzado
 
 
-class Permisos(APIView):
-    def get(self, request):
-
-
-        content_type_usuario = ContentType.objects.get(app_label='auth', model='user')
-
-        permiso_basico = Permission.objects.create(
-            codename='puede_ver_basico',
-            name='Puede ver recursos básicos',
-            content_type=content_type_usuario
-        )
-
-        permiso_avanzado_1 = Permission.objects.create(
-            codename='puede_ver_avanzado_1',
-            name='Puede ver recurso avanzado 1',
-            content_type=content_type_usuario
-        )
-
-        permiso_avanzado_2 = Permission.objects.create(
-            codename='puede_ver_avanzado_2',
-            name='Puede ver recurso avanzado 2',
-            content_type=content_type_usuario
-        )
-        return Response({"PERMISOS CREADOS"})
-
-
-
-
 class   Usuario(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
