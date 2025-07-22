@@ -9,7 +9,7 @@ from django.contrib.auth.models import User, Permission
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from app.models import PerfilAvanzado, PerfilBasico
+from app.models import PerfilAvanzado, PerfilBasico 
 from app.serializers import UserSerializers
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -21,7 +21,7 @@ class   Usuario(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
         print("ENTRE")
-     
+        nivel_mensaje=""
         username = request.data.get('username')
         password = request.data.get('password')
         nivel = request.data.get('nivel')
@@ -70,7 +70,13 @@ class   Usuario(APIView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
+    perfil=""
     user = get_object_or_404(User, username=request.data['username'])
+    existe = PerfilAvanzado.objects.filter(usuario_id=user.id).count()
+    if existe >=1:
+        perfil="avanzado"
+    else:
+        perfil="basico"
 
     if not user.check_password(request.data['password']):
         return Response({"error": "Invalid"}, status=status.HTTP_404_NOT_FOUND)
@@ -78,7 +84,7 @@ def login(request):
     token, _ = Token.objects.get_or_create(user=user)
     serializer = UserSerializers(instance=user)
 
-    return Response({"token": token.key, "user": serializer.data}, status=status.HTTP_200_OK)
+    return Response({"token": token.key, "user": serializer.data,"usuario":perfil}, status=status.HTTP_200_OK)
 
 
 
@@ -94,3 +100,4 @@ def profile_basico(request):
 @permission_classes([IsAuthenticated,EsPerfilAvanzado])
 def profile_avanzado(request):
     return Response({"message": "Acceso avanzado autorizado"})
+    
