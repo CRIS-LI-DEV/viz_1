@@ -57,7 +57,7 @@ class ControladorDetalleAPIView(APIView):
         def post(self, request, pk):
             cwc = get_object_or_404(ControlWebControlador, controlador_id=pk)
             nuevo_estado = request.data.get('estado')
-
+            print(cwc)
             if nuevo_estado is None:
                 return Response({"error": "Se requiere el campo 'estado'."}, status=status.HTTP_400_BAD_REQUEST)
 
