@@ -72,7 +72,7 @@ class   Usuario(APIView):
 def login(request):
     perfil_avanzado=False
     user = get_object_or_404(User, username=request.data['username'])
-    existe = PerfilAvanzado.objects.filter(usuario_id=user.id).count()
+    existe = PerfilAvanzado.objects.get(usuario_id=user.id).count()
     print(existe)
     if existe >=1:
         perfil_avanzado=True
