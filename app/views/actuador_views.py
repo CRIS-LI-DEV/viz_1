@@ -54,8 +54,9 @@ class ActuadorDetalleAPIView(APIView):
         
 
         if nuevo_estado is None:
-            actuador.estado=bool(nuevo_estado)
             return Response({"error": "Se requiere el campo 'estado'."}, status=status.HTTP_400_BAD_REQUEST)
+        actuador.estado=bool(nuevo_estado)
+           
         actuador.save()
         # Asegura que sea un booleano real
         cwa.estado = str(nuevo_estado).lower() in ['true', '1']
