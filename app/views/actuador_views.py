@@ -51,10 +51,12 @@ class ActuadorDetalleAPIView(APIView):
         cwa = get_object_or_404(ControlWebActuador, actuador=actuador)
 
         nuevo_estado = request.data.get('estado')
+        
 
         if nuevo_estado is None:
+            actuador.estado=bool(nuevo_estado)
             return Response({"error": "Se requiere el campo 'estado'."}, status=status.HTTP_400_BAD_REQUEST)
-
+        actuador.save()
         # Asegura que sea un booleano real
         cwa.estado = str(nuevo_estado).lower() in ['true', '1']
         cwa.save()
@@ -62,4 +64,4 @@ class ActuadorDetalleAPIView(APIView):
         return Response({
             "mensaje": "Estado del actuador actualizado correctamente.",
             "nuevo_estado": cwa.estado
-        }, status=status.HTTP_200_OK)
+        }, status=status.HTTP_200_OK)   
