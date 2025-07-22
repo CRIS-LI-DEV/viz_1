@@ -70,13 +70,13 @@ class   Usuario(APIView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
-    perfil=""
+    perfil_avanzado=False
     user = get_object_or_404(User, username=request.data['username'])
     existe = PerfilAvanzado.objects.filter(usuario_id=user.id).count()
     if existe >=1:
-        perfil="avanzado"
+        perfil_avanzado=True
     else:
-        perfil="basico"
+        perfil_avanzado=False
 
     if not user.check_password(request.data['password']):
         return Response({"error": "Invalid"}, status=status.HTTP_404_NOT_FOUND)
@@ -84,7 +84,7 @@ def login(request):
     token, _ = Token.objects.get_or_create(user=user)
     serializer = UserSerializers(instance=user)
 
-    return Response({"token": token.key, "user": serializer.data,"usuario":perfil}, status=status.HTTP_200_OK)
+    return Response({"token": token.key, "user": serializer.data,"perfil_avanzado":perfil_avanzado}, status=status.HTTP_200_OK)
 
 
 
