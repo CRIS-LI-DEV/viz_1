@@ -1,7 +1,7 @@
 # urls.py
 from django.urls import path
 from app.views.actuador_views import  ActuadorAPIView, ActuadorDetalleAPIView
-from app.views.historial_views import HistorialActuadorAPIView, HistorialSensorAPIView,HistorialRangoDatosSensor,HistorialRangoDatosActuador, FiltrarHistorialPorFechasAPIView,FiltrarHistorialConResumenAPIView
+from app.views.historial_views import HistorialActuadorAPIView, HistorialSensorAPIView,HistorialRangoDatosSensor,HistorialRangoDatosActuador, FiltrarHistorialSensorPorFechasAPIView,FiltrarHistorialSensorConResumenAPIView, FiltrarHistorialActuadorPorFechasAPIView,  FiltrarHistorialActuadorConResumenAPIView
 from app.views.controlador_views import ControladorAPIView,ControladorDetalleAPIView
 from app.views.broker import BrokerIn,BrokerOut
 from app.views.sensor_views import SensorAPIView, SensorDetalleAPIView
@@ -15,9 +15,13 @@ historiales = [
     path('api/sensores/<int:id>/historial/<int:numero_registros>/', HistorialSensorAPIView.as_view(), name='historial_sensor'),
     path('api/sensores/<int:id>/fecha/<str:fecha>/n_datos/<int:n_datos>/', HistorialRangoDatosSensor.as_view(), name='historial_fechas_n_datos'),
     path('api/actuadores/<int:id>/fecha/<str:fecha>/n_datos/<int:n_datos>/', HistorialRangoDatosActuador.as_view(), name='historial_fechas_n_datos'),
-   path('api/historial/<int:registro_id>/', FiltrarHistorialPorFechasAPIView.as_view(), name='filtrar-historial'),
-   path('api/historial/resumen/<int:registro_id>/', FiltrarHistorialConResumenAPIView.as_view(), name='historial-resumen'),
-
+  
+   path('api/sensores/historial/<int:registro_id>/', FiltrarHistorialSensorPorFechasAPIView.as_view(), name='filtrar-historial'),
+   path('api/actuadores/historial/<int:registro_id>/', FiltrarHistorialActuadorPorFechasAPIView.as_view(), name='filtrar_historial_actuador_por_fechas'),
+   
+   path('api/sensores/historial/resumen/<int:registro_id>/', FiltrarHistorialSensorConResumenAPIView.as_view(), name='historial-resumen'),
+  
+    path('api/actuadores/historial/resumen/<int:registro_id>/', FiltrarHistorialActuadorConResumenAPIView.as_view(), name='filtrar_historial_actuador_con_resumen'),
     ]
 
 

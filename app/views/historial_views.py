@@ -13,7 +13,7 @@ from app.serializers import HistorialSensorSerializer
 from datetime import datetime
 
 
-class FiltrarHistorialConResumenAPIView(APIView):
+class FiltrarHistorialSensorConResumenAPIView(APIView):
     def post(self, request, registro_id):
         fecha_inicio = request.data.get('fecha_inicio')
         fecha_fin = request.data.get('fecha_fin')
@@ -73,7 +73,67 @@ class FiltrarHistorialConResumenAPIView(APIView):
             "resumen": resumenes
         })
 
-class FiltrarHistorialPorFechasAPIView(APIView):
+class FiltrarHistorialActuadorConResumenAPIView(APIView):
+    def post(self, request, registro_id):
+        fecha_inicio = request.data.get('fecha_inicio')
+        fecha_fin = request.data.get('fecha_fin')
+        numero_de_resumen = request.data.get('numero_de_resumen')
+
+        if not fecha_inicio or not fecha_fin or not numero_de_resumen:
+            return Response({
+                "error": "Debe proporcionar 'fecha_inicio', 'fecha_fin' y 'numero_de_resumen'."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            fecha_inicio = datetime.fromisoformat(fecha_inicio)
+            fecha_fin = datetime.fromisoformat(fecha_fin)
+            numero_de_resumen = int(numero_de_resumen)
+            if numero_de_resumen <= 0:
+                raise ValueError("numero_de_resumen debe ser positivo.")
+        except ValueError as e:
+            return Response({"error": f"Error en los datos: {str(e)}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Obtener registros del historial del actuador
+        registros = HistorialActuador.objects.filter(
+            actuador_id=registro_id,
+            fecha_cambio__range=(fecha_inicio, fecha_fin)
+        ).order_by('fecha_cambio')
+
+        total_datos = registros.count()
+        if total_datos == 0:
+            return Response({"error": "No se encontraron datos para el filtro."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        tamaño_intervalo = max(total_datos // numero_de_resumen, 1)
+
+        resumenes = []
+        estados = list(registros.values_list('estado', flat=True))  # Usar 'estado' en lugar de 'valor'
+        fechas = list(registros.values_list('fecha_cambio', flat=True))
+
+        for i in range(0, total_datos, tamaño_intervalo):
+            grupo_estados = estados[i:i + tamaño_intervalo]
+            grupo_fechas = fechas[i:i + tamaño_intervalo]
+
+            promedio = sum(grupo_estados) / len(grupo_estados)  # Convertirá True/False en 1/0 automáticamente
+            resumenes.append({
+                "fecha_inicio": grupo_fechas[0],
+                "fecha_fin": grupo_fechas[-1],
+                "promedio_estado": promedio,
+                "cantidad_datos": len(grupo_estados),
+            })
+
+        return Response({
+            "total_datos": total_datos,
+            "numero_de_resumen": numero_de_resumen,
+            "tamaño_intervalo": tamaño_intervalo,
+            "resumen": resumenes
+        })
+
+
+
+
+class FiltrarHistorialSensorPorFechasAPIView(APIView):
     def post(self, request, registro_id):
         fecha_ingreso = request.data.get('fecha_inicio')
         fecha_salida = request.data.get('fecha_fin')
@@ -99,6 +159,29 @@ class FiltrarHistorialPorFechasAPIView(APIView):
         serializer = HistorialSensorSerializer(registros, many=True)
         return Response(serializer.data)
     
+class FiltrarHistorialActuadorPorFechasAPIView(APIView):
+    def post(self, request, registro_id):
+        fecha_ingreso = request.data.get('fecha_inicio')
+        fecha_salida = request.data.get('fecha_fin')
+
+        if not fecha_ingreso or not fecha_salida:
+            return Response({"error": "Debe proporcionar 'fecha_inicio' y 'fecha_fin'."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            fecha_ingreso = datetime.fromisoformat(fecha_ingreso)
+            fecha_salida = datetime.fromisoformat(fecha_salida)
+        except ValueError:
+            return Response({"error": "Formato de fecha inválido. Use YYYY-MM-DD o YYYY-MM-DDTHH:MM:SS"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        registros = HistorialActuador.objects.filter(
+            actuador_id=registro_id,
+            fecha_cambio__range=(fecha_ingreso, fecha_salida)
+        )
+
+        serializer = HistorialActuadorSerializer(registros, many=True)
+        return Response(serializer.data)
 
 
 class HistorialActuadorAPIView(APIView):
