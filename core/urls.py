@@ -21,7 +21,7 @@ historiales = [
    
    path('api/sensores/historial/resumen/<int:registro_id>/', FiltrarHistorialSensorConResumenAPIView.as_view(), name='historial-resumen'),
   
-    path('api/actuadores/historial/resumen/<int:actuador_id>/', FiltrarHistorialActuadorConResumenAPIView.as_view(), name='filtrar_historial_actuador_con_resumen'),
+    path('api/actuadores/historial/resumen/<int:registro_id>/', FiltrarHistorialActuadorConResumenAPIView.as_view(), name='filtrar_historial_actuador_con_resumen'),
     ]
 
 
