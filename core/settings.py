@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+     'channels',
     'rest_framework',
     'rest_framework.authtoken',
      'corsheaders',
@@ -67,7 +68,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+ASGI_APPLICATION = 'core.asgi.application' 
 
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],  # o la IP/puerto de tu servidor Redis
+        },
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {

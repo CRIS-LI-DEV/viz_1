@@ -2,38 +2,21 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware, is_naive
+from django.db.models import Avg, IntegerField
+from django.db.models.functions import Cast
+from datetime import datetime, timedelta
+
 from app.models import HistorialActuador, HistorialSensor
 from app.serializers import HistorialActuadorSerializer, HistorialSensorSerializer
-from django.utils.dateparse import parse_datetime
 
-from django.utils.timezone import make_aware, is_naive
-from rest_framework import status
-from app.models import HistorialSensor
-from app.serializers import HistorialSensorSerializer
-from datetime import datetime
-from django.utils.dateparse import parse_datetime
-from datetime import timedelta
-from django.db.models import Avg
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.utils.dateparse import parse_datetime
-from app.models import HistorialSensor
-from django.db.models import Avg
-from datetime import timedelta
-from django.db.models import Avg, IntegerField
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.db.models import Avg
-from django.utils.dateparse import parse_datetime
-from django.db.models.functions import Cast
 
 
 class FiltrarHistorialSensorConResumenAPIView(APIView):
     def post(self, request, registro_id):
-        print("entre")
+        #print("entre")
         fecha_inicio_str = request.data.get('fecha_inicio')
         fecha_final_str = request.data.get('fecha_final')
         numero_resumen = request.data.get('numero_de_resumen')

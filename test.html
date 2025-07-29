@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resumen Sensor WebSocket</title>
+</head>
+<body>
+    <h2>Consulta de Resumen de Sensor</h2>
+
+    <label for="sensor_id">Sensor ID:</label>
+    <input type="number" id="sensor_id"><br><br>
+
+    <label for="fecha_inicio">Fecha Inicio (YYYY-MM-DDTHH:MM:SSZ):</label>
+    <input type="text" id="fecha_inicio" value="2025-07-28T00:00:00Z"><br><br>
+
+    <label for="fecha_final">Fecha Final (YYYY-MM-DDTHH:MM:SSZ):</label>
+    <input type="text" id="fecha_final" value="2025-07-28T23:59:59Z"><br><br>
+
+    <label for="numero_de_resumen">Número de Resúmenes:</label>
+    <input type="number" id="numero_de_resumen" value="4"><br><br>
+
+    <button onclick="enviarDatos()">Enviar</button>
+
+    <h3>Resultado:</h3>
+    <pre id="resultado"></pre>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8000/ws/chat/sensor/"); // cambia `sensor` si tu sala tiene otro nombre
+
+        socket.onopen = () => {
+            console.log("WebSocket conectado.");
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            document.getElementById("resultado").textContent = JSON.stringify(data, null, 2);
+        };
+
+        socket.onerror = (error) => {
+            console.error("WebSocket error:", error);
+        };
+
+        function enviarDatos() {
+            const sensor_id = parseInt(document.getElementById("sensor_id").value);
+            const fecha_inicio = document.getElementById("fecha_inicio").value;
+            const fecha_final = document.getElementById("fecha_final").value;
+            const numero_de_resumen = parseInt(document.getElementById("numero_de_resumen").value);
+
+            const payload = {
+                sensor_id,
+                fecha_inicio,
+                fecha_final,
+                numero_de_resumen
+            };
+
+            socket.send(JSON.stringify(payload));
+        }
+    </script>
+</body>
+</html>
