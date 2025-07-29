@@ -70,13 +70,15 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 ASGI_APPLICATION = 'core.asgi.application' 
 
-
+redis_url = os.environ.get("REDIS_URL")
+if not redis_url:
+    raise RuntimeError("La variable de entorno REDIS_URL no está definida.")
 
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],  # o la IP/puerto de tu servidor Redis
+            'hosts': [redis_url],  # o la IP/puerto de tu servidor Redis
         },
     },
 }

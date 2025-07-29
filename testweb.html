@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Resumen Sensor WebSocket</title>
+</head>
+<body>
+    <h2>Consulta de Resumen de Sensor</h2>
+
+    <label for="sala">Sala WebSocket:</label>
+    <input type="text" id="sala" value="sensor" /><br /><br />
+
+    <label for="sensor_id">Sensor ID:</label>
+    <input type="number" id="sensor_id" /><br /><br />
+
+    <label for="fecha_inicio">Fecha Inicio (YYYY-MM-DDTHH:MM:SSZ):</label>
+    <input type="text" id="fecha_inicio" value="2025-07-28T00:00:00Z" /><br /><br />
+
+    <label for="fecha_final">Fecha Final (YYYY-MM-DDTHH:MM:SSZ):</label>
+    <input type="text" id="fecha_final" value="2025-07-28T23:59:59Z" /><br /><br />
+
+    <label for="numero_de_resumen">Número de Resúmenes:</label>
+    <input type="number" id="numero_de_resumen" value="4" /><br /><br />
+
+    <button onclick="conectarWebSocket()">Conectar WebSocket</button>
+    <button onclick="enviarDatos()">Enviar</button>
+
+    <h3>Resultado:</h3>
+    <pre id="resultado">No conectado.</pre>
+
+    <script>
+        let socket = null;
+
+        function conectarWebSocket() {
+            const sala = document.getElementById("sala").value.trim();
+            if (!sala) {
+                alert("Por favor ingresa una sala válida.");
+                return;
+            }
+
+            if (socket && socket.readyState !== WebSocket.CLOSED) {
+                socket.close();
+            }
+
+            const url = `wss://viz1-production.up.railway.app/ws/chat/${sala}/`;
+            socket = new WebSocket(url);
+
+            socket.onopen = () => {
+                console.log("WebSocket conectado a sala:", sala);
+                document.getElementById("resultado").textContent = "Conectado al servidor WebSocket.";
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    document.getElementById("resultado").textContent = JSON.stringify(data, null, 2);
+                } catch (e) {
+                    document.getElementById("resultado").textContent = "Error al parsear mensaje: " + event.data;
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                document.getElementById("resultado").textContent = "Error en WebSocket, revisa consola.";
+            };
+
+            socket.onclose = (event) => {
+                console.log("WebSocket cerrado:", event);
+                document.getElementById("resultado").textContent = "Conexión WebSocket cerrada.";
+            };
+        }
+
+        function enviarDatos() {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                alert("WebSocket no está conectado aún. Primero conecta el WebSocket.");
+                return;
+            }
+
+            const sensor_id = parseInt(document.getElementById("sensor_id").value);
+            const fecha_inicio = document.getElementById("fecha_inicio").value.trim();
+            const fecha_final = document.getElementById("fecha_final").value.trim();
+            const numero_de_resumen = parseInt(document.getElementById("numero_de_resumen").value);
+
+            if (isNaN(sensor_id)) {
+                alert("Por favor ingresa un Sensor ID válido.");
+                return;
+            }
+            if (!fecha_inicio) {
+                alert("Por favor ingresa una fecha de inicio.");
+                return;
+            }
+            if (!fecha_final) {
+                alert("Por favor ingresa una fecha final.");
+                return;
+            }
+            if (isNaN(numero_de_resumen) || numero_de_resumen <= 0) {
+                alert("Número de resúmenes debe ser un entero mayor que 0.");
+                return;
+            }
+
+            const payload = {
+                sensor_id,
+                fecha_inicio,
+                fecha_final,
+                numero_de_resumen
+            };
+
+            socket.send(JSON.stringify(payload));
+        }
+    </script>
+</body>
+</html>
