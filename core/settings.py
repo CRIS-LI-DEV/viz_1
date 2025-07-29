@@ -78,7 +78,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [redis_url],  # o la IP/puerto de tu servidor Redis
+            'hosts': ['redis://default:VxZwOcZbJrzgMKupetmZojHhVsWqBEbO@redis.railway.internal:6379'],  # o la IP/puerto de tu servidor Redis
         },
     },
 }
