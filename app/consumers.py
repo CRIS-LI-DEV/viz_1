@@ -13,6 +13,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(self.sala_grupo, self.channel_name)
 
     async def receive(self, text_data):
+        print("MENSAJE-CLIENTE")
         try:
             data = json.loads(text_data)
             sensor_id = data.get("sensor_id")
@@ -47,7 +48,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         from .models import HistorialSensor
         import bisect
 
-        # Obtener todos los datos en el rango ordenados por fecha
         datos = list(HistorialSensor.objects.filter(
             sensor_id=sensor_id,
             fecha_cambio__range=(fecha_inicio, fecha_final)
