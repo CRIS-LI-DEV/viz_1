@@ -72,15 +72,17 @@ ASGI_APPLICATION = 'core.asgi.application'
    
    
 
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': ['redis://default:VxZwOcZbJrzgMKupetmZojHhVsWqBEbO@redis.railway.internal:6379'],  # o la IP/puerto de tu servidor Redis
+            'hosts': ['redis://default:VxZwOcZbJrzgMKupetmZojHhVsWqBEbO@redis.railway.internal:6379']
         },
     },
 }
+
+ #'hosts': ['redis://default:VxZwOcZbJrzgMKupetmZojHhVsWqBEbO@redis.railway.internal:6379']
+#'hosts': [('127.0.0.1', 6379)],
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 DATABASES = {
