@@ -71,15 +71,16 @@ WSGI_APPLICATION = 'core.wsgi.application'
 ASGI_APPLICATION = 'core.asgi.application' 
    
    
-
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': ['redis://default:VxZwOcZbJrzgMKupetmZojHhVsWqBEbO@redis.railway.internal:6379']
+            'hosts': ['redis://:VxZwOcZbJrzgMKupetmZojHhVsWqBEbO@redis.railway.internal:6379']
         },
     },
 }
+
+
 
  #'hosts': ['redis://default:VxZwOcZbJrzgMKupetmZojHhVsWqBEbO@redis.railway.internal:6379']
 #'hosts': [('127.0.0.1', 6379)],
