@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Django Consumer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input, select, button {
+      width: 100%;
+      max-width: 500px;
+      padding: 8px;
+      margin-top: 5px;
+      font-size: 16px;
+    }
+
+    #info {
+      background-color: #e7f3fe;
+      border-left: 6px solid #2196F3;
+      padding: 10px;
+      margin-top: 15px;
+      display: none;
+    }
+
+    pre {
+      background: #eee;
+      padding: 1em;
+      margin-top: 20px;
+      max-width: 100%;
+      overflow-x: auto;
+    }
+
+    code {
+      background-color: #f2f2f2;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>WebSocket Cliente</h1>
+
+  <label for="accion">Acción:</label>
+  <select id="accion">
+    <option value="">-- Selecciona una acción --</option>
+    <option value="filtrar_sensor_resumen">filtrar_sensor_resumen</option>
+    <option value="filtrar_actuador_resumen">filtrar_actuador_resumen</option>
+    <option value="filtrar_sensor_por_fechas">filtrar_sensor_por_fechas</option>
+    <option value="filtrar_actuador_por_fechas">filtrar_actuador_por_fechas</option>
+    <option value="ultimos_n_sensor">ultimos_n_sensor</option>
+    <option value="ultimos_n_actuador">ultimos_n_actuador</option>
+    <option value="rango_datos_sensor">rango_datos_sensor</option>
+    <option value="rango_datos_actuador">rango_datos_actuador</option>
+  </select>
+
+  <div id="info"></div>
+
+  <label for="sensor_id">ID Sensor / Actuador:</label>
+  <input type="number" id="sensor_id">
+
+  <label for="fecha_inicio">Fecha Inicio (ISO):</label>
+  <input type="datetime-local" id="fecha_inicio">
+
+  <label for="fecha_final">Fecha Final (ISO):</label>
+  <input type="datetime-local" id="fecha_final">
+
+  <label for="numero_de_resumen">Resumen / Cantidad:</label>
+  <input type="number" id="numero_de_resumen">
+
+  <button onclick="enviar()">Enviar</button>
+
+  <pre id="respuesta"></pre>
+
+  <script>
+    // Diccionario de campos requeridos
+    const acciones = {
+      filtrar_sensor_resumen: ["sensor_id", "fecha_inicio", "fecha_final", "numero_de_resumen"],
+      filtrar_actuador_resumen: ["actuador_id", "fecha_inicio", "fecha_final", "numero_de_resumen"],
+      filtrar_sensor_por_fechas: ["sensor_id", "fecha_inicio", "fecha_final"],
+      filtrar_actuador_por_fechas: ["actuador_id", "fecha_inicio", "fecha_final"],
+      ultimos_n_sensor: ["sensor_id", "n"],
+      ultimos_n_actuador: ["actuador_id", "n"],
+      rango_datos_sensor: ["sensor_id", "fecha", "n"],
+      rango_datos_actuador: ["actuador_id", "fecha", "n"]
+    };
+
+    const socket = new WebSocket('ws://localhost:8000/ws/chat/mi_sala/');
+
+    socket.onopen = () => console.log('✅ WebSocket conectado');
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      document.getElementById('respuesta').textContent = JSON.stringify(data, null, 2);
+    };
+
+    socket.onerror = (error) => {
+      console.error('❌ Error WebSocket:', error);
+    };
+
+    // Mostrar información dinámica
+    document.getElementById('accion').addEventListener('change', function () {
+      const valor = this.value;
+      const infoBox = document.getElementById('info');
+      if (!valor || !acciones[valor]) {
+        infoBox.style.display = 'none';
+        infoBox.innerHTML = '';
+        return;
+      }
+
+      const campos = acciones[valor];
+      infoBox.innerHTML = `
+        <strong>Variables necesarias para <code>${valor}</code>:</strong>
+        <ul>${campos.map(c => `<li><code>${c}</code></li>`).join("")}</ul>
+      `;
+      infoBox.style.display = 'block';
+    });
+
+    function enviar() {
+      const accion = document.getElementById('accion').value;
+      const id = parseInt(document.getElementById('sensor_id').value);
+      const fecha_inicio = document.getElementById('fecha_inicio').value;
+      const fecha_final = document.getElementById('fecha_final').value;
+      const numero = parseInt(document.getElementById('numero_de_resumen').value);
+
+      const payload = { accion };
+
+      // Agregar dinámicamente los campos correctos
+      if (accion.includes("sensor")) payload.sensor_id = id;
+      if (accion.includes("actuador")) payload.actuador_id = id;
+      if (accion.includes("resumen") || accion.includes("por_fechas")) {
+        payload.fecha_inicio = fecha_inicio;
+        payload.fecha_final = fecha_final;
+        if (accion.includes("resumen")) payload.numero_de_resumen = numero;
+      }
+      if (accion.includes("ultimos_n")) payload.n = numero;
+      if (accion.includes("rango_datos")) {
+        payload.fecha = fecha_inicio;
+        payload.n = numero;
+      }
+
+      socket.send(JSON.stringify(payload));
+    }
+  </script>
+</body>
+</html>
